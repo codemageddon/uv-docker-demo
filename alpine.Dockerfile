@@ -1,9 +1,8 @@
 ARG UV_VERSION=0.4.17
 ARG PYTHON_VERSION=3.12
-ARG BASE_BUILD_DISTRO=bookworm
-ARG BASE_RUNTIME_DISTRO=slim-${BASE_BUILD_DISTRO}
+ARG BASE_DISTRO=alpine
 
-FROM ghcr.io/astral-sh/uv:python${PYTHON_VERSION}-${BASE_BUILD_DISTRO} AS build
+FROM ghcr.io/astral-sh/uv:python${PYTHON_VERSION}-${BASE_DISTRO} AS build
 
 ENV UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \
@@ -17,13 +16,13 @@ RUN --mount=type=cache,target=${UV_CACHE_DIR} \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
     uv sync --frozen --no-install-project --no-editable --no-dev
 
-FROM python:${PYTHON_VERSION}-${BASE_RUNTIME_DISTRO} AS runtime
+FROM python:${PYTHON_VERSION}-${BASE_DISTRO} AS runtime
 
 WORKDIR /usr/src/app
 ENV PATH="/usr/src/app/.venv/bin:${PATH}"
 
 COPY --from=build /usr/src/app/.venv /usr/src/app/.venv
-RUN useradd -U -M -d /nonexistent app
+RUN adduser -S -D -h /nonexistent app
 USER app
 COPY hello_world ./hello_world
 ENTRYPOINT ["python", "hello_world/main.py"]
