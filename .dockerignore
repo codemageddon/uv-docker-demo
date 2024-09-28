@@ -1,0 +1,10 @@
+.venv/
+.git/
+.gitignore
+LICENSE
+README.md
+__pycache__/
+*.Dockerfile
+Dockerfile
+benchmark.sh
+results.csv
